@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(LineRenderer))] // Garante que o objeto terá um LineRenderer
+[RequireComponent(typeof(LineRenderer))]
 public class TrajectoryMover : MonoBehaviour
 {
     [Header("Objeto a ser animado")]
@@ -21,33 +21,30 @@ public class TrajectoryMover : MonoBehaviour
     public bool useBezier = true;
 
     [Header("Configurações da Linha (Visual)")]
-    public int lineResolution = 30; // Quão suave a curva desenhada será
+    public int lineResolution = 30;
     private LineRenderer lineRenderer;
 
     void Start()
     {
-        // Configura o Line Renderer automaticamente ao iniciar
         lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.startWidth = 0.05f;
         lineRenderer.endWidth = 0.05f;
-        lineRenderer.material = new Material(Shader.Find("Sprites/Default")); // Material básico
+        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
 
         UpdateLineVisuals();
     }
 
     void Update()
     {
-        // Alternar modo de curva com Espaço (Novo Input System do Unity 6)
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             useBezier = !useBezier;
-            UpdateLineVisuals(); // Atualiza a cor e o formato da linha na tela
+            UpdateLineVisuals();
             Debug.Log("Modo de interpolação: " + (useBezier ? "Bézier Composta" : "Linear"));
         }
 
         if (controlPoints.Count < 4 || movingObject == null) return;
 
-        // Atualiza o tempo 't' fazendo um ping-pong
         if (movingForward)
         {
             t += Time.deltaTime * speed;
@@ -59,24 +56,17 @@ public class TrajectoryMover : MonoBehaviour
             if (t < 0f) { t = 0f; movingForward = true; }
         }
 
-        // Move o objeto usando a nova função unificada
         movingObject.position = GetTrajectoryPoint(t);
 
-        // Se você for mover os pontos com o jogo rodando, descomente a linha abaixo 
-        // para a linha visual se atualizar dinamicamente a cada frame:
-        // UpdateLineVisuals(); 
     }
 
-    // Função que retorna a posição exata baseada no tempo global (0 a 1) e no modo escolhido
     Vector3 GetTrajectoryPoint(float globalTime)
     {
         if (!useBezier)
         {
-            // Linear
             return Vector3.Lerp(controlPoints[0].position, controlPoints[controlPoints.Count - 1].position, globalTime);
         }
 
-        // Bézier Composta
         int curveCount = (controlPoints.Count - 1) / 3;
         float scaledT = globalTime * curveCount;
         int currentCurve = Mathf.FloorToInt(scaledT);
@@ -93,7 +83,6 @@ public class TrajectoryMover : MonoBehaviour
             controlPoints[nodeIndex + 3].position);
     }
 
-    // Fórmula Matemática da Curva Cúbica de Bézier
     Vector3 CalculateBezierPoint(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
     {
         float u = 1 - t;
@@ -110,14 +99,12 @@ public class TrajectoryMover : MonoBehaviour
         return p;
     }
 
-    // Atualiza o componente LineRenderer para desenhar a trajetória no jogo
     void UpdateLineVisuals()
     {
         if (controlPoints == null || controlPoints.Count < 4 || lineRenderer == null) return;
 
         if (!useBezier)
         {
-            // Desenha apenas uma reta Azul
             lineRenderer.positionCount = 2;
             lineRenderer.SetPosition(0, controlPoints[0].position);
             lineRenderer.SetPosition(1, controlPoints[controlPoints.Count - 1].position);
@@ -126,7 +113,6 @@ public class TrajectoryMover : MonoBehaviour
         }
         else
         {
-            // Desenha a curva Vermelha cheia de pontos para ficar suave
             int curveCount = (controlPoints.Count - 1) / 3;
             int totalPoints = (curveCount * lineResolution) + 1;
             lineRenderer.positionCount = totalPoints;
@@ -142,7 +128,6 @@ public class TrajectoryMover : MonoBehaviour
         }
     }
 
-    // Mantivemos o OnDrawGizmos apenas para as linhas guias verdes (Convex Hull) no Editor
     void OnDrawGizmos()
     {
         if (controlPoints == null || controlPoints.Count < 4) return;
