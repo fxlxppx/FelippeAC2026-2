@@ -9,6 +9,9 @@ public class TrajectoryMover : MonoBehaviour
     public Transform movingObject;
 
     [Header("Pontos de Controle")]
+    // Na Curva de Bézier Composta, o primeiro segmento precisa de 4 pontos.
+    // Os segmentos seguintes precisam de apenas 3 novos pontos, pois o último ponto 
+    // do segmento anterior funciona como o primeiro ponto do próximo.
     [Tooltip("Adicione pontos na regra de 1 + 3n (ex: 4, 7, 10, 13 pontos)")]
     public List<Transform> controlPoints;
 
@@ -36,6 +39,7 @@ public class TrajectoryMover : MonoBehaviour
 
     void Update()
     {
+        // Alterna entre a interpolação Linear e a de Bézier
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             useBezier = !useBezier;
@@ -45,6 +49,7 @@ public class TrajectoryMover : MonoBehaviour
 
         if (controlPoints.Count < 4 || movingObject == null) return;
 
+        // Atualiza o tempo global 't' (variando sempre entre 0 e 1)
         if (movingForward)
         {
             t += Time.deltaTime * speed;
@@ -57,23 +62,33 @@ public class TrajectoryMover : MonoBehaviour
         }
 
         movingObject.position = GetTrajectoryPoint(t);
-
     }
 
+    // Calcula a posição do objeto com base no tempo global da animação
     Vector3 GetTrajectoryPoint(float globalTime)
     {
         if (!useBezier)
         {
+            // Interpolação Linear simples: traça uma reta direta do primeiro ao último ponto
             return Vector3.Lerp(controlPoints[0].position, controlPoints[controlPoints.Count - 1].position, globalTime);
         }
 
+
         int curveCount = (controlPoints.Count - 1) / 3;
+
+        // Multiplica o tempo global (0 a 1) pela quantidade de curvas.
         float scaledT = globalTime * curveCount;
+
+        // A parte inteira de scaledT diz em qual segmento da curva estamos.
         int currentCurve = Mathf.FloorToInt(scaledT);
 
+        // Prevenção para garantir que o índice não estoure quando o tempo chegar exatamente em 1.0
         if (currentCurve >= curveCount) currentCurve = curveCount - 1;
 
+        // A parte decimal dá o tempo local daquele segmento específico
         float localT = scaledT - currentCurve;
+
+        // Encontra o índice inicial dos pontos de controle base para o segmento atual
         int nodeIndex = currentCurve * 3;
 
         return CalculateBezierPoint(localT,
@@ -91,14 +106,15 @@ public class TrajectoryMover : MonoBehaviour
         float uuu = uu * u;
         float ttt = tt * t;
 
-        Vector3 p = uuu * p0;
-        p += 3 * uu * t * p1;
-        p += 3 * u * tt * p2;
-        p += ttt * p3;
+        Vector3 p = uuu * p0;         // Influência do Ponto Inicial
+        p += 3 * uu * t * p1;         // Influência do primeiro Ponto de Controle
+        p += 3 * u * tt * p2;         // Influência do segundo Ponto de Controle
+        p += ttt * p3;                // Influência do Ponto Final
 
         return p;
     }
 
+    // Atualiza os pontos do LineRenderer para desenhar a trajetória no modo executável
     void UpdateLineVisuals()
     {
         if (controlPoints == null || controlPoints.Count < 4 || lineRenderer == null) return;
@@ -128,6 +144,7 @@ public class TrajectoryMover : MonoBehaviour
         }
     }
 
+    // Desenha as guias do Convex Hull da Curva no modo Editor
     void OnDrawGizmos()
     {
         if (controlPoints == null || controlPoints.Count < 4) return;
