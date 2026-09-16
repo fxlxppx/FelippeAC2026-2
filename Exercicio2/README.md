@@ -6,7 +6,7 @@
 ## Comentários gerais
 > Está separado em duas sessões, uma pastas contém o arquivo da unity para editar dentro da Engine e o outro é um executável do exercício para ver o comportamento das partículas tanto em nascimento e tragetória, sendo controlado pelo teclado
   
-## Comentários gerais
+## Comentários Explicativos
 > Fiz separado duas sessões: Exercicio2_Animacao é o projeto na Engine, o outro Exercicio2_exe é o executável do projeto, para rodar é só abrir o executável, no programa há interações com o teclado numérico:
 
 ## DE 1 a 3 Nascimento de Partículas // DE 4 a 8 Tragetória, por padrão a combinação é 1 e 4.
