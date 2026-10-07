@@ -8,7 +8,7 @@
 
 > Escolhemos a opção A: Movimentação de Objetos.
 
-> O trabalho está sendo aplicado em um jogo ainda em desenvolvimento, alterando sistemas reais do projeto.
+> O trabalho está sendo aplicado dentro de Jhonny Devilsong, um rhythm shooter top-down 2D ainda em desenvolvimento, alterando sistemas reais do projeto.
 
 > O foco da aplicação é, a partir do espectro da música controlar: o movimento dos inimigos e o rastro de fumaça que o jogador deixa ao se movimentar.
 
